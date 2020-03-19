@@ -1,0 +1,82 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:padding="50dp"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Switch
+        android:id="@+id/enabled_switch"
+        android:enabled="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:soundEffectsEnabled="true"
+        android:text="Alert Switch"/>
+
+    <Switch
+        android:enabled="true"
+        android:id="@+id/vibrate_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:soundEffectsEnabled="true"
+        android:text="Vibrate Switch"/>
+
+    <Switch
+        android:enabled="true"
+        android:soundEffectsEnabled="true"
+        android:id="@+id/sound_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sound Switch"/>
+
+
+    <TextView
+        android:id="@+id/version_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textSize="12sp"/>
+
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/btnstop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop Ringtone"/>
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="5dp"
+        ads:adUnitId="ca-app-pub-4250344724353850/3076210317">
+    </com.google.android.gms.ads.AdView>
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView1"
+        android:layout_above="@id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-4250344724353850/6809433588"/>
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView2"
+        android:layout_above="@id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-4250344724353850/5378654615">
+    </com.google.android.gms.ads.AdView>
+</LinearLayout>
