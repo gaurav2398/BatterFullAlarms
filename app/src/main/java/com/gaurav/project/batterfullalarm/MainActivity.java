@@ -13,6 +13,8 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     public static final String PREFERENCE_KEY_SOUND = "sound";
 
     private SharedPreferences mPreferences;
-    private Switch mEnabledSwitch;
+    public static int pluged;
 
     private InterstitialAd mInterstitialAd;
 
@@ -55,10 +57,55 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         mPreferences = getSharedPreferences(PREFERENCES_NAME, 0);
-
         setContentView(R.layout.activity_main);
 
-        ((TextView) findViewById(R.id.version_text)).setText("VERSION_NAME");
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = getApplicationContext().registerReceiver(null, ifilter);
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        float batteryPct = level / (float)scale;
+        final float p = batteryPct * 100;
+
+        Log.d("Battery percentage",String.valueOf(Math.round(p))+"%");
+
+        ((TextView) findViewById(R.id.version_text)).setText("Battery percentage : "+String.valueOf(Math.round(p)));
+
+        final Handler handler = new Handler();//class variable
+        final int[] count = {0};
+
+        handler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                updateCounter(count[0]++);
+
+                if (MainService.status>0) {
+
+                    stop.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            stopsound(count[0]++);
+
+                        }
+                    });
+                }
+                if (MainService.status==4)
+                {
+                    if (MainService.status==4)
+                    {
+                        stopsound(count[0]++);
+                    }
+                }
+                if(count[0] < (10*1000)) {
+
+                    handler.postDelayed(this, 1000);
+
+                }
+
+            }
+
+        });
 
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
@@ -78,7 +125,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             }
 
         });
-
 
         AdView adView = new AdView(this);
         adView.setAdSize(AdSize.BANNER);
@@ -101,20 +147,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         AdRequest adRequest2 = new AdRequest.Builder().build();
         mAdView2.loadAd(adRequest2);
 
-
         stop = findViewById(R.id.btnstop);
-
-        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-        final Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(),uri);
-
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                if (String.valueOf(Math.round(p)).equals("100")) {
                     MainService.ringtone.stop();
-                    MainService.ringtone.stop();
-                    MainService.ringtone.stop();
-
+                }
                 if (mInterstitialAd.isLoaded()) {
                     mInterstitialAd.show();
                 } else {
@@ -148,7 +188,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
                     @Override
                     public void onAdClosed() {
-                        // Code to be executed when the interstitial ad is closed.
                     }
                 });
 
@@ -157,8 +196,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         });
 
         boolean isEnabled = mPreferences.getBoolean(PREFERENCE_KEY_ENABLED, false);
+        Switch mEnabledSwitch;
         mEnabledSwitch = (Switch) findViewById(R.id.enabled_switch);
-        mEnabledSwitch.setChecked(isEnabled);
+        mEnabledSwitch.setChecked(mPreferences.getBoolean(ALARM_SERVICE, false));
         mEnabledSwitch.setOnCheckedChangeListener(this);
 
         Switch vibrateSwitch = (Switch) findViewById(R.id.vibrate_switch);
@@ -210,14 +250,40 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 break;
         }
     }
-    public static boolean isPlugged(Context context) {
-        boolean isPlugged= false;
-        Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-        isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
-            isPlugged = isPlugged || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+    private void updateCounter(final int count) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                Intent batteryStatus = getApplicationContext().registerReceiver(null, ifilter);
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                pluged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                float batteryPct = level / (float)scale;
+                final float p = batteryPct * 100;
+            }
+        });
+        if (pluged==2)
+            ((TextView) findViewById(R.id.pluged)).setText("Charging : Yes");
+        else
+            ((TextView) findViewById(R.id.pluged)).setText("Charging : No");
+
+        if (MainService.status>0)
+        {
+            stop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainService.ringtone.stop();
+                }
+            });
         }
-        return isPlugged;
+    }
+    private void stopsound(final int count) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MainService.ringtone.stop();
+            }
+        });
     }
 }

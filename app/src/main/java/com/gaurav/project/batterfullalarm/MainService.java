@@ -1,6 +1,7 @@
 package com.gaurav.project.batterfullalarm;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -13,13 +14,18 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
+
+import java.util.Locale;
 
 public class MainService extends Service {
     private static final String TAG = MainService.class.getName();
@@ -27,6 +33,7 @@ public class MainService extends Service {
     private boolean mAlreadyNotified = false;
     private NotificationManager mNotificationManager;
 
+    public static int pluged;
 public static int status;
     public static boolean f;
     public static Ringtone ringtone;
@@ -66,7 +73,8 @@ public static int status;
                 final String action = intent.getAction();
 
                 Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-                ringtone = RingtoneManager.getRingtone(getApplicationContext(),uri);
+                Uri path = Uri.parse("android.resource://" + getPackageName() + "/"+R.raw.ringtones);
+                ringtone = RingtoneManager.getRingtone(getApplicationContext(),path);
 
                 if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                      status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, Integer.MIN_VALUE);
@@ -87,6 +95,7 @@ public static int status;
                             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
                                     notificationIntent, 0);
 
+                            showNotification(getString(R.string.app_name),getString(R.string.full),"",new Intent(context,MainActivity.class));
 
                             Notification notification = new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -120,6 +129,14 @@ public static int status;
                             .setContentText(String.format("battery status: %d", status))
                             .build();
                     mNotificationManager.notify(mNotificationId, notification);
+
+                    IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                    Intent batteryStatus = getApplicationContext().registerReceiver(null, ifilter);
+                    int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                    int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                     pluged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                    float batteryPct = level / (float)scale;
+                    final float p = batteryPct * 100;
 
 
 /*
@@ -158,11 +175,11 @@ public static int status;
 
             case BatteryManager.BATTERY_STATUS_CHARGING:
 
-                ringtone.stop();
                 break;
             case BatteryManager.BATTERY_STATUS_FULL:
                 strState = "charging";
 
+                ringtone.play();
                 if (status==4) {
                     ringtone.stop();
                 }
@@ -173,7 +190,7 @@ public static int status;
                         public void run() {
                             ringtone.play();
                         }
-                    }, 5000);
+                    }, 100);
                     ringtone.stop();
                 }
                 break;
@@ -182,5 +199,33 @@ public static int status;
                 break;
         }
 
+    }
+    public void showNotification(String heading, String description, String imageUrl, Intent intent){
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this,"channelID")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle(heading)
+                .setContentText(description)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        int notificationId = 1;
+        createChannel(notificationManager);
+        notificationManager.notify(notificationId, notificationBuilder.build());
+    }
+
+    public void createChannel(NotificationManager notificationManager){
+        if (Build.VERSION.SDK_INT < 26) {
+            return;
+        }
+        NotificationChannel channel = new NotificationChannel("channelID","name", NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription("Description");
+        notificationManager.createNotificationChannel(channel);
     }
 }

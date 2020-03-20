@@ -7,26 +7,28 @@
     android:padding="50dp"
     android:orientation="vertical"
     tools:context=".MainActivity">
+    <TextView
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Please Enabled All The Switch"
+        android:singleLine="true"
+        android:textSize="14sp"/>
 
     <Switch
         android:id="@+id/enabled_switch"
-        android:enabled="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:soundEffectsEnabled="true"
         android:text="Alert Switch"/>
 
     <Switch
-        android:enabled="true"
         android:id="@+id/vibrate_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:soundEffectsEnabled="true"
         android:text="Vibrate Switch"/>
 
     <Switch
-        android:enabled="true"
-        android:soundEffectsEnabled="true"
         android:id="@+id/sound_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,8 +39,16 @@
         android:id="@+id/version_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:textSize="12sp"/>
+        android:layout_marginTop="10dp"
+        android:text="battery percentage"
+        android:textSize="13sp"/>
+    <TextView
+        android:id="@+id/pluged"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="pluged"
+        android:textSize="13sp"/>
 
     <Button
         android:layout_marginTop="20dp"
